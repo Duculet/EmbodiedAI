@@ -50,8 +50,8 @@ class Agent(pygame.sprite.Sprite):  # super class
             max_speed=None,
             min_speed=None,
             mass=None,
-            width: int=None,
-            height: int=None,
+            width: int = None,
+            height: int = None,
             dT=None,
             index: int = None
     ) -> None:
@@ -118,6 +118,7 @@ class Agent(pygame.sprite.Sprite):  # super class
             pos:
 
         """
+        # print("GOT", pos)
         self._pos = pos
         self.rect.center = tuple(
             pos
@@ -186,7 +187,8 @@ class Agent(pygame.sprite.Sprite):  # super class
         sin = np.sin(self.wandering_angle)
         n_v = normalize(self.v)
         circle_center = n_v * wander_dist
-        displacement = np.dot(np.array([[cos, -sin], [sin, cos]]), n_v * wander_radius)
+        displacement = np.dot(
+            np.array([[cos, -sin], [sin, cos]]), n_v * wander_radius)
         wander_force = circle_center + displacement
         self.wandering_angle += wander_angle * rands
         return wander_force

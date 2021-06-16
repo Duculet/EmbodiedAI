@@ -113,11 +113,14 @@ class Swarm(pygame.sprite.Sprite):
 
         """
         # Count current numbers
-        values = {"S": 0, "I": 0, "R": 0}
+        values = {"S": 0, "I": 0, "R": 0, "Q": 0, "D": 0}
         for state in lst:
             values[state] += 1
 
+        # print(values)
+
         for x in values:
+            # print(x)
             self.points_to_plot[x].append(values[x])
 
     def update(self) -> None:
@@ -128,8 +131,10 @@ class Swarm(pygame.sprite.Sprite):
         # update the movement
         self.datapoints = []
         for agent in self.agents:
+            self.datapoints.append(agent.type)
             agent.update_actions()
 
+        # print(self.datapoints)
         if self.datapoints:
             self.add_point(self.datapoints)
         self.remain_in_screen()

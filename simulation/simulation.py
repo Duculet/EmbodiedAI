@@ -9,9 +9,11 @@ from typing import Union, Tuple
 from experiments.aggregation.aggregation import Aggregations
 from experiments.covid.population import Population
 from experiments.flocking.flock import Flock
+from experiments.covid.config import config
 
 
 def _plot_covid(data) -> None:
+    # print("DATA", data)
     """
     Plot the data related to the covid experiment. The plot is based on the number of Susceptible,
     Infected and Recovered agents
@@ -26,8 +28,11 @@ def _plot_covid(data) -> None:
     )
     fig = plt.figure()
     plt.plot(data["S"], label="Susceptible", color=(1, 0.5, 0))  # Orange
-    plt.plot(data["I"], label="Infected", color=(1, 0, 0))  # Red
+    plt.plot([i + q for i, q in zip(data["I"], data["Q"])],
+             label="Infected", color=(1, 0, 0))  # Red
     plt.plot(data["R"], label="Recovered", color=(0, 1, 0))  # Green
+    plt.plot(data["Q"], label="Quarantined", color=(0, 0, 1))  # Blue
+    plt.plot(data["D"], label="Dead", color=(1, 0, 1))  # Purple
     plt.title("Covid-19 Simulation S-I-R")
     plt.xlabel("Time")
     plt.ylabel("Population")
@@ -47,7 +52,7 @@ def _plot_aggregation() -> None:
 
 
 """
-General simulation pipeline, suitable for all experiments 
+General simulation pipeline, suitable for all experiments
 """
 
 
@@ -77,6 +82,8 @@ class Simulation:
         self.iter = iterations
         self.swarm_type = swarm_type
 
+        self.FPS = config['screen']['fps']  # frames per second setting
+
         # swarm settings
         self.num_agents = num_agents
         if self.swarm_type == "flock":
@@ -99,13 +106,13 @@ class Simulation:
 
     def plot_simulation(self) -> None:
         """Depending on the type of experiment, plots the final data accordingly"""
-        if self.swarm_type == "Covid":
+        if self.swarm_type == "covid":
             _plot_covid(self.swarm.points_to_plot)
 
-        elif self.swarm_type == "Flock":
+        elif self.swarm_type == "flock":
             _plot_flock()
 
-        elif self.swarm_type == "Aggregation":
+        elif self.swarm_type == "aggregation":
             _plot_aggregation()
 
     def initialize(self) -> None:
@@ -124,7 +131,9 @@ class Simulation:
         self.swarm.update()
         self.swarm.display(self.screen)
 
+        fpsClock = pygame.time.Clock()
         pygame.display.flip()
+        fpsClock.tick(self.FPS)
 
     def run(self) -> None:
         """

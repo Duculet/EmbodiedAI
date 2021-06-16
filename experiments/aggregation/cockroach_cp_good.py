@@ -5,7 +5,6 @@ from typing import Tuple
 
 from simulation.agent import Agent
 from simulation.utils import normalize, truncate
-from simulation.utils import *
 from experiments.aggregation.config import config
 
 """
@@ -71,12 +70,30 @@ class Cockroach(Agent):
         left_collide, right_collide = pygame.sprite.collide_mask(
             self, left_site), pygame.sprite.collide_mask(self, right_site)
 
+        # if self.left_size > self.right_size:
+        #     self.size_ratio = self.left_size / self.right_size
+        # else:
+        #     self.size_ratio = self.right_size / self.left_size
+
         if bool(left_collide) or bool(right_collide):
             self.environment = "site"
         else:
             self.environment = "outside"
 
         self.state = self.state_update(self.state)
+
+        # if self.state == 'wandering':
+        #     print("wandering")
+        #     # actions
+        # elif self.state == 'joining':
+        #     print("joining")
+        #     # actions
+        # elif self.state == 'still':
+        #     print("still")
+        #     # actions
+        # else:  # if state is leaving
+        #     print("leaving")
+        #     # actions
 
     def state_update(self, current_state):
         """
@@ -107,16 +124,24 @@ class Cockroach(Agent):
         """
         # determine p_join if entering a site
         if self.environment == 'site':
+            left_site, right_site = self.aggregation.objects.sites
+            left_collide, right_collide = pygame.sprite.collide_mask(
+                self, left_site), pygame.sprite.collide_mask(self, right_site)
+
+            left_size = left_site.rect[-1]
+            right_size = right_site.rect[-1]
+
+            if bool(left_collide):
+                size_ratio = left_size / right_size
+            elif bool(right_collide):
+                size_ratio = right_size / left_size
+            else:
+                size_ratio = 1
 
             p_join = (
                 config["cockroach"]["p_join_base"]
                 + self.n_neighbours * config["cockroach"]["join_weight"]
-            )
-
-            if self.n_neighbours >= config["cockroach"]["critical_mass"]:
-                p_join = 1
-            elif p_join > config["cockroach"]["p_join_max"]:
-                p_join = config["cockroach"]["p_join_max"]
+            ) * size_ratio
 
             # decide new state based on p_join
             if p_join > np.random.random():
@@ -134,11 +159,6 @@ class Cockroach(Agent):
 
             return new_state
         else:
-            # Random direction change with a predefined probability
-            p_change_direction = config["cockroach"]["p_change"]
-            if p_change_direction > np.random.random():
-                self.v = self.set_velocity()
-
             return current_state
 
     def still(self, current_state):
@@ -169,16 +189,25 @@ class Cockroach(Agent):
             current_state
         """
 
+        left_site, right_site = self.aggregation.objects.sites
+        left_collide, right_collide = pygame.sprite.collide_mask(
+            self, left_site), pygame.sprite.collide_mask(self, right_site)
+
+        left_size = left_site.rect[-1]
+        right_size = right_site.rect[-1]
+
+        if bool(left_collide):
+            size_ratio = right_size / left_size
+        elif bool(right_collide):
+            size_ratio = left_size / right_size
+        else:
+            size_ratio = 1
+
         # determine p_leave
         p_leave = (
             config["cockroach"]["p_leave_base"]
             - self.n_neighbours * config["cockroach"]["leave_weight"]
-        )
-
-        if self.n_neighbours >= config["cockroach"]["critical_mass"]:
-            p_leave = 0
-        elif p_leave < config["cockroach"]["p_leave_min"]:
-            p_leave = config["cockroach"]["p_leave_min"]
+        ) * size_ratio
 
         # decide new state based on p_leave
         if p_leave > np.random.random():
@@ -200,9 +229,13 @@ class Cockroach(Agent):
         ----
         """
 
+        # print('-' * 50)
+        # print(self.v)
         check_still = self.v == np.asarray([0, 0])
         if check_still.all():
             self.v = self.set_velocity()
+        # print(self.v)
+        # print('-' * 50)
 
         self.current_t += 1
 
