@@ -108,16 +108,16 @@ class Person(Agent):
         self.n_neighbours = len(
             self.population.find_neighbors(self, desired_distance))
 
-        # determine mobility
-        if self.curfew[0] == True:
-            # check if curfew-time is in effect
-            if self.curfew[1] < time_of_day < self.curfew[2]:
-                self.v = np.array([0, 0])
-            else:
-                pass
-                # actions that person takes if he/she is out and about
+        # # determine mobility
+        # if self.curfew[0] == True:
+        #     # check if curfew-time is in effect
+        #     if self.curfew[1] < time_of_day < self.curfew[2]:
+        #         self.v = np.array([0, 0])
+        #     else:
+        #         pass
+        #         # actions that person takes if he/she is out and about
 
-                # if person gets infected
+        #         # if person gets infected
 
         if any(sites):
             if not self.wears_mask and self.n_neighbours and 0.9 > np.random.random():
