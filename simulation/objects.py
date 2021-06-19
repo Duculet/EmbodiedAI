@@ -17,6 +17,7 @@ class Objects(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super(Objects, self).__init__()
         self.obstacles = pygame.sprite.Group()
+        self.walls = pygame.sprite.Group()
         self.sites = pygame.sprite.Group()
 
     def add_object(self, file, pos, scale, obj_type) -> None:
@@ -33,6 +34,8 @@ class Objects(pygame.sprite.Sprite):
             self.obstacles.add(Object(filename=file, pos=np.array(pos), scale=scale))
         elif obj_type == "site":
             self.sites.add(Object(filename=file, pos=np.array(pos), scale=scale))
+        elif obj_type == "wall":
+            self.walls.add(Object(filename=file, pos=np.array(pos), scale=scale))
         else:
             print("object type not specified")
 
@@ -59,6 +62,7 @@ class Object(pygame.sprite.Sprite):
             scale: Defaults to None
         """
         super(Object, self).__init__()
+        self.scale = scale
         self.image, self.rect = image_with_rect(filename, scale)
         self.mask = pygame.mask.from_surface(self.image)
         self.pos: np.ndarray = pos if pos is not None else np.zeros(2)

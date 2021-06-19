@@ -24,6 +24,8 @@ class Population(Swarm):
         self.campus_scale = config["environment"]["campus"][1]
         self.campus_loc = config["environment"]["campus"][2]
 
+        self.lockdown = config["environment"]["lockdown"]
+
     def initialize(self, num_agents: int) -> None:
         """
         Args:
@@ -57,12 +59,21 @@ class Population(Swarm):
                 file=filename, pos=[500, 1000], scale=[1000, 5], obj_type="obstacle"
             )
         elif self.campus:
-            building_obstacle = (
-                "experiments/covid/images/Building_spot.png"
-            )
-            building_site = (
-                "experiments/covid/images/Building_site.png"
-            )
+            if self.lockdown:
+                building_obstacle = (
+                    "experiments/covid/images/Building_lock.png"
+                )
+                building_site = (
+                    "experiments/covid/images/Building_site_lock.png"
+                )
+            else:
+                building_obstacle = (
+                    "experiments/covid/images/Building_spot.png"
+                )
+                building_site = (
+                    "experiments/covid/images/Building_site.png"
+                )
+
             for location in self.campus_loc:
                 self.objects.add_object(
                     file=building_site, pos=location, scale=self.campus_scale, obj_type="site"
@@ -96,19 +107,19 @@ class Population(Swarm):
 
             # Left border
             self.objects.add_object(
-                file=separator, pos=[0, 500], scale=[5, 1000], obj_type="obstacle"
+                file=separator, pos=[0, 500], scale=[5, 1000], obj_type="wall"
             )
             # Right border
             self.objects.add_object(
-                file=separator, pos=[1000, 500], scale=[5, 1000], obj_type="obstacle"
+                file=separator, pos=[1000, 500], scale=[5, 1000], obj_type="wall"
             )
             # Top border
             self.objects.add_object(
-                file=separator, pos=[500, 0], scale=[1000, 5], obj_type="obstacle"
+                file=separator, pos=[500, 0], scale=[1000, 5], obj_type="wall"
             )
             # Bottom border
             self.objects.add_object(
-                file=separator, pos=[500, 1000], scale=[1000, 5], obj_type="obstacle"
+                file=separator, pos=[500, 1000], scale=[1000, 5], obj_type="wall"
             )
 
         else:
@@ -143,18 +154,49 @@ class Population(Swarm):
 
         if self.campus:
             # add agents to the environment
-            for index, agent in enumerate(range(num_agents)):
-                coordinates = generate_coordinates(self.screen)
+            if self.lockdown:
+                for index, agent in enumerate(range(num_agents)):
+                    coordinates = generate_coordinates(self.screen)
 
-                # if sites present re-estimate the corrdinates
-                if config["population"]["obstacles"]:
-                    while (min_x < coordinates[0] < max_x
-                            or min_y < coordinates[1] < max_y
-                           ):
-                        coordinates = generate_coordinates(self.screen)
+                    for id_obs, obstacle in enumerate(self.objects.obstacles):
+                        if id_obs + 1 != len(self.objects.obstacles):
+                            if index % len(self.objects.obstacles) == id_obs % len(self.objects.obstacles):
+                                min_x, max_x = area(
+                                    obstacle.pos[0], obstacle.scale[0])
+                                min_y, max_y = area(
+                                    obstacle.pos[1], obstacle.scale[1])
+                                while (coordinates[0] >= max_x - 10
+                                    or coordinates[0] <= min_x + 10
+                                    or coordinates[1] >= max_y - 10
+                                    or coordinates[1] <= min_y + 10):
+                                    coordinates = generate_coordinates(self.screen)
 
-                self.add_agent(Person(pos=np.array(coordinates),
-                                      v=None, population=self, index=index))
+                                self.add_agent(Person(pos=np.array(coordinates),
+                                                  v=None, population=self, index=index))
+                                break
+                        else:
+                            while (min_x < coordinates[0] < max_x
+                                   or min_y < coordinates[1] < max_y
+                                   ):
+                                coordinates = generate_coordinates(self.screen)
+                    # else:
+                    #     self.add_agent(Person(pos=np.array(coordinates),
+                    #                           v=None, population=self, index=index))
+
+                        
+            else:
+                for index, agent in enumerate(range(num_agents)):
+                    coordinates = generate_coordinates(self.screen)
+
+                    # if sites present re-estimate the corrdinates
+                    if config["population"]["obstacles"]:
+                        while (min_x < coordinates[0] < max_x
+                                or min_y < coordinates[1] < max_y
+                            ):
+                            coordinates = generate_coordinates(self.screen)
+
+                    self.add_agent(Person(pos=np.array(coordinates),
+                                        v=None, population=self, index=index))
 
         else:
             if config["population"]["obstacles"]:  # you need to define this variable

@@ -4,6 +4,7 @@ import pygame
 from experiments.covid.config import config
 from simulation.agent import Agent
 from simulation.utils import *
+import time
 
 
 class Person(Agent):
@@ -18,10 +19,8 @@ class Person(Agent):
             v,
             image,
             color,
-            max_speed=config["agent"]["max_speed"] //
-            2 if config["environment"]["lockdown"] else config["agent"]["max_speed"],
-            min_speed=config["agent"]["min_speed"] //
-            2 if config["environment"]["lockdown"] else config["agent"]["min_speed"],
+            max_speed=config["agent"]["max_speed"],
+            min_speed=config["agent"]["min_speed"],
             width=config["agent"]["width"],
             height=config["agent"]["height"],
             dT=config["agent"]["dt"],
@@ -44,7 +43,7 @@ class Person(Agent):
         # (boolean, start_time, end_time)
         self.curfew = config["person"]["curfew"]
         self.corona_app = config["person"]["corona_app"]  # 'True' or 'False'
-        if 0.01 > np.random.random():
+        if config["person"]["p_infected"] > np.random.random():
             # print("INFECTED")
             self.current_state = 'infected'
             self.type = 'I'
@@ -59,10 +58,6 @@ class Person(Agent):
             self.p_mask = config["person"]["p_mask_none"]
         elif self.mask_worn == 'inside_only':
             self.p_mask = config["person"]["p_mask_inside_only"]
-            # for obstacle in self.population.objects.sites:
-            #     collide = pygame.sprite.collide_mask(self, obstacle)
-            #     if bool(collide):
-            #         self.p_mask = 0.95
         else:  # if 'always'
             self.p_mask = config["person"]["p_mask_always"]
 
@@ -72,14 +67,19 @@ class Person(Agent):
             else:
                 self.wears_mask = False
 
+        self.p_infected_inside = config["person"]["p_infected_inside"]
+        self.p_infected_outside = config["person"]["p_infected_outside"]
+
+        self.age = np.random.randint(1, 101)
+        self.Q = False
+
+        self.incubation_period = config["person"]["incubation_period"] + np.random.normal(
+            0, config["person"]["incubation_var"])
+
     def update_actions(self) -> None:
         # self.population.datapoints.append(self.type)
         if self.type != "D":
             for obstacle in self.population.objects.obstacles:
-                collide = pygame.sprite.collide_mask(self, obstacle)
-                if bool(collide):
-                    self.avoid_obstacle()
-            for obstacle in self.population.objects.walls:
                 collide = pygame.sprite.collide_mask(self, obstacle)
                 if bool(collide):
                     self.avoid_obstacle()
@@ -106,11 +106,9 @@ class Person(Agent):
                 if bool(collide):
                     sites.append(True)
 
-        # determine desired distance to other persons
-        # WHAT DO YOU MEAN BY MIN()?
         desired_distance = max(
             0, (self.social_distancing + np.random.normal(0, config["person"]["distance_var"])))
-        # MAKE it a probability
+        
         self.n_neighbours = len(
             self.population.find_neighbors(self, desired_distance))
 
@@ -126,12 +124,12 @@ class Person(Agent):
         #         # if person gets infected
 
         if any(sites):
-            if not self.wears_mask and self.n_neighbours and 0.2 > np.random.random():
+            if not self.wears_mask and self.n_neighbours and self.p_infected_inside > np.random.random():
                 self.type = 'I'
                 self.image.fill('blue')
                 new_state = 'infected'
         else:
-            if not self.wears_mask and self.n_neighbours >= 5 and 0.4 > np.random.random():
+            if not self.wears_mask and self.n_neighbours >= 5 and self.p_infected_outside > np.random.random():
                 self.type = 'I'
                 self.image.fill('blue')
                 new_state = 'infected'
@@ -149,27 +147,36 @@ class Person(Agent):
             if config["person"]["p_recovery"] > np.random.random():
                 new_state = 'recovered'
                 if self.type == 'Q':
-                    self.pos = np.array([500.0, 500.0])
+                    self.pos = np.array([500.0, 275.0])
                     self.v = self.set_velocity()
                 self.type = 'R'
                 self.image.fill('green')
 
             return new_state
-
-        if self.infection_timer > config["person"]["incubation_period"]:
-            if config["person"]["p_onset"] > np.random.random():
-                self.image.fill('red')
-                if self.p_dead > np.random.random():
-                    self.type = 'D'
-                    self.image.fill('pink')
-                    self.image.set_alpha(0)
-                    new_state = 'dead'
-                elif self.p_quarantine > np.random.random():
-                    # Quarantine
-                    self.pos = np.array([500.0, 150.0])
+        
+        if self.incubation_period < self.infection_timer < config["person"]["min_recovery_period"]:
+            self.image.fill('red')
+            if self.infection_timer % 400 == 0 and self.p_dead * self.age > np.random.random():
+                self.type = 'D'
+                self.image.set_alpha(0)
+                new_state = 'dead'
+            elif self.infection_timer % 100 == 0:
+                if self.type != "Q" and self.p_quarantine > np.random.random():
                     self.type = 'Q'
-                self.p_dead = 0
-                self.p_quarantine = 0
+                    self.pos = np.array([500.0, 150.0])
+                    self.v = self.set_velocity()
+                    self.p_quarantine = 0
+                self.p_quarantine += 0.05
+
+        # if self.infection_timer > self.incubation_period:
+            
+        #     if self.p_dead * self.age > np.random.random():
+        #         self.type = 'D'
+        #         self.image.set_alpha(0)
+        #         new_state = 'dead'
+        #     elif self.p_quarantine > np.random.random():
+        #         # Quarantine
+
 
         # # check whether person knows he/she is infected
         # else:
