@@ -158,9 +158,6 @@ class Swarm(pygame.sprite.Sprite):
         for wall in self.objects.walls:
             wall.display(screen)
 
-        for hub in self.objects.hubs:
-            hub.display(screen)
-
         for agent in self.agents:
             agent.update()
             agent.display(screen)

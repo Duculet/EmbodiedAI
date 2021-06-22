@@ -25,6 +25,7 @@ class Population(Swarm):
         self.campus_loc = config["environment"]["campus"][2]
 
         self.lockdown = config["environment"]["lockdown"]
+
     def initialize(self, num_agents: int) -> None:
         """
         Args:
@@ -72,6 +73,7 @@ class Population(Swarm):
                 building_site = (
                     "experiments/covid/images/Building_site.png"
                 )
+
             for location in self.campus_loc:
                 self.objects.add_object(
                     file=building_site, pos=location, scale=self.campus_scale, obj_type="site"
@@ -84,7 +86,7 @@ class Population(Swarm):
                 "experiments/covid/images/Hub.png"
             )
             self.objects.add_object(
-                file=filename, pos=[500, 500], scale=self.campus_scale, obj_type="hub"
+                file=filename, pos=[500, 500], scale=self.campus_scale, obj_type="site"
             )
 
             filename = (

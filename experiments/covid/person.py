@@ -53,6 +53,11 @@ class Person(Agent):
             self.infection_timer = 0
         else:
             self.current_state = 'susceptible'
+        self.mobility_state = 'wandering'
+        self.environment = "outside"
+        self.current_t = 0
+        self.t_leave = 0
+        self.n_neighbours = 0
 
         # determine p_mask
         if self.mask_worn == 'none':
@@ -79,6 +84,7 @@ class Person(Agent):
                 collide = pygame.sprite.collide_mask(self, obstacle)
                 if bool(collide):
                     self.avoid_obstacle()
+
             for obstacle in self.population.objects.walls:
                 collide = pygame.sprite.collide_mask(self, obstacle)
                 if bool(collide):
@@ -89,12 +95,122 @@ class Person(Agent):
     def state_update(self, current_state):
         new_state = current_state
 
+        # determine desired distance to other persons
+        desired_distance = max(
+            0, (self.social_distancing + np.random.normal(0, config["person"]["distance_var"])))
+
+        self.n_neighbours = len(
+            self.population.find_neighbors(self, desired_distance))
+
         if current_state == 'susceptible':
             new_state = self.infection(current_state)
         elif current_state == 'infected':
             new_state = self.recovery(current_state)
+        if self.mobility_state == 'wandering':
+            self.join()
+        elif self.mobility_state == 'joining':
+            self.still()
+        elif self.mobility_state == 'still':
+            self.leave()
+        else:  # if state is leaving
+            self.wandering()
 
         return new_state
+
+    def join(self):
+        """
+        Function to decide if agent joins an aggregation
+        """
+
+        for obstacle in self.population.objects.hubs:
+            collide = pygame.sprite.collide_mask(self, obstacle)
+            if bool(collide):
+                self.environment = "hub"
+            else:
+                self.environment = "outside"
+
+        # determine p_join if entering a site
+        if self.environment == 'hub':
+
+            p_join = (
+                config["person"]["p_join_base"]
+                + self.n_neighbours * config["person"]["join_weight"]
+            )
+
+            if self.n_neighbours >= config["person"]["critical_mass"]:
+                p_join = 1
+            elif p_join > config["person"]["p_join_max"]:
+                p_join = config["person"]["p_join_max"]
+
+            # decide new state based on p_join
+            if p_join > np.random.random():
+                # reset timer
+                self.current_t = 0
+                # set stop time (after which person switches to state 'still')
+                self.t_stop = config["person"]["t_stop"] \
+                    + int(np.random.normal(0,
+                          config["person"]["t_stop_var"]))
+                self.mobility_state = 'joining'
+            # if person decides not to join, it enters the 'leaving state'
+            else:
+                self.mobility_state = 'leaving'
+        else:
+            # Random direction change with a predefined probability
+            p_change_direction = config["person"]["p_change"]
+            if p_change_direction > np.random.random():
+                self.v = self.set_velocity()
+
+    def still(self):
+        """
+        Function to decide if agent halts
+        """
+        self.current_t += 1
+
+        # check stop timer and environment
+        if self.current_t > self.t_stop and self.environment == 'hub':
+            self.mobility_state = 'still'
+            self.v = np.array([0, 0])
+        elif self.current_t > self.t_stop and self.environment != 'hub':
+            self.mobility_state = 'wandering'
+
+    def leave(self):
+        """
+        Function to decide if agent leaves an aggregation
+        """
+
+        # determine p_leave
+        p_leave = (
+            config["person"]["p_leave_base"]
+            - self.n_neighbours * config["person"]["leave_weight"]
+        )
+
+        if self.n_neighbours >= config["person"]["critical_mass"]:
+            p_leave = 0
+        elif p_leave < config["person"]["p_leave_min"]:
+            p_leave = config["person"]["p_leave_min"]
+
+        # decide new state based on p_leave
+        if p_leave > np.random.random():
+            # reset timer
+            self.current_t = 0
+            # set leave_time
+            self.t_leave = config["person"]["t_leave"] + \
+                int(np.random.normal(0, config["person"]["t_leave_var"]))
+            self.mobility_state = 'leaving'
+
+    def wandering(self):
+        """
+        Function to decide if agent starts wandering
+        """
+
+        check_still = self.v == np.asarray([0, 0])
+        if check_still.all():
+            self.v = self.set_velocity()
+
+        self.current_t += 1
+
+        if self.current_t < self.t_leave:
+            self.mobility_state = 'wandering'
 
     def infection(self, current_state):
         new_state = current_state
@@ -105,14 +221,6 @@ class Person(Agent):
                 collide = pygame.sprite.collide_mask(self, obstacle)
                 if bool(collide):
                     sites.append(True)
-
-        # determine desired distance to other persons
-        # WHAT DO YOU MEAN BY MIN()?
-        desired_distance = max(
-            0, (self.social_distancing + np.random.normal(0, config["person"]["distance_var"])))
-        # MAKE it a probability
-        self.n_neighbours = len(
-            self.population.find_neighbors(self, desired_distance))
 
         # # determine mobility
         # if self.curfew[0] == True:
@@ -205,6 +313,3 @@ class Person(Agent):
         #             #         v = 0
         #             #         # actions if in quarantine
         return new_state
-
-    def immunity(self, current_state):
-        pass
