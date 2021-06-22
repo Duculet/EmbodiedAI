@@ -5,7 +5,7 @@ object_location = [500, 500]
 
 [environment]
 split = [[0, 0], [5, 480], [500, 240]]
-lockdown = true
+lockdown = false
 campus = [
     [1, 1],
     [200, 200],
@@ -21,7 +21,7 @@ campus = [
 ]
 
 [screen]
-frames = 5000
+frames = inf
 height = 1000
 width = 1000
 fps = 42069
