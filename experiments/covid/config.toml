@@ -1,6 +1,6 @@
 [base]
 swarm_type = 'covid'
-n_agents = 250
+n_agents = 50
 object_location = [500, 500]
 
 [environment]
@@ -47,6 +47,7 @@ min_recovery_period = 1200
 p_recovery = 0.001
 p_onset = 0.003
 incubation_period = 375
+incubation_var = 50
 p_quarantine = 0.33
 p_dead = 0.05
 p_change = 0.01

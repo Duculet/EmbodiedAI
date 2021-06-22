@@ -44,7 +44,7 @@ class Person(Agent):
         # (boolean, start_time, end_time)
         self.curfew = config["person"]["curfew"]
         self.corona_app = config["person"]["corona_app"]  # 'True' or 'False'
-        if 0.01 > np.random.random():
+        if 0.05 > np.random.random():
             # print("INFECTED")
             self.current_state = 'infected'
             self.type = 'I'
@@ -58,6 +58,7 @@ class Person(Agent):
         self.current_t = 0
         self.t_leave = 0
         self.n_neighbours = 0
+        self.pause = False
 
         # determine p_mask
         if self.mask_worn == 'none':
@@ -79,6 +80,7 @@ class Person(Agent):
 
     def update_actions(self) -> None:
         # self.population.datapoints.append(self.type)
+        # check if agent is dead
         if self.type != "D":
             for obstacle in self.population.objects.obstacles:
                 collide = pygame.sprite.collide_mask(self, obstacle)
@@ -90,18 +92,15 @@ class Person(Agent):
                 if bool(collide):
                     self.avoid_obstacle()
 
-        self.state_update()
-
-    def state_update(self):
-        # check if not dead first
-        if self.type != "D":
             # determine desired distance to other persons
             self.desired_distance = max(
                 0, (self.social_distancing + np.random.normal(0, config["person"]["distance_var"])))
 
-            self.n_neighbours_out = len([neighbor for neighbor in self.population.find_neighbors(self, self.desired_distance // 4) if neighbor.environment == "outside"])
-            self.n_neighbours_in = len([neighbor for neighbor in self.population.find_neighbors(self, self.desired_distance) if neighbor.environment == "site" or neighbor.environment == "hub"])
-            
+            self.n_neighbours_out = len([neighbor for neighbor in self.population.find_neighbors(
+                self, self.desired_distance // 4) if neighbor.environment == "outside"])
+            self.n_neighbours_in = len([neighbor for neighbor in self.population.find_neighbors(
+                self, self.desired_distance) if neighbor.environment == "site" or neighbor.environment == "hub"])
+
             for obstacle in self.population.objects.hubs:
                 collide = pygame.sprite.collide_mask(self, obstacle)
                 if bool(collide):
@@ -110,28 +109,39 @@ class Person(Agent):
                     self.environment = "outside"
 
             for obstacle in self.population.objects.sites:
-                    collide = pygame.sprite.collide_mask(self, obstacle)
-                    if bool(collide):
-                        self.environment = "site"
+                collide = pygame.sprite.collide_mask(self, obstacle)
+                if bool(collide):
+                    self.environment = "site"
+                    break
 
-            if self.environment == 'site':
-                if self.dT == config["agent"]["dt"]:
+            if self.environment == 'hub':
+                if self.dT == config["agent"]["dt"] and not self.pause:
+                    self.dT /= 4
+                    # print('-' * 50)
+                    # print("OLD:", self.dT)
+                    # print("NEW", self.dT)
+            elif self.environment == 'site':
+                if self.dT == config["agent"]["dt"] and not self.pause:
                     self.dT /= 2
                     # print('-' * 50)
                     # print("OLD:", self.dT)
                     # print("NEW", self.dT)
             else:
-                if not(self.dT == config["agent"]["dt"]):
-                    self.dT *= 2
+                if not(self.dT == config["agent"]["dt"]) and not self.pause:
+                    self.dT = config["agent"]["dt"]
                     # print('-' * 50)
                     # print("OLD:", self.dT)
                     # print("NEW", self.dT)
+
+        self.state_update()
+
+    def state_update(self):
 
         if self.current_state == 'susceptible':
             self.infection()
         elif self.current_state == 'infected':
             self.recovery()
-            
+
         if self.mobility_state == 'wandering':
             self.join()
         elif self.mobility_state == 'joining':
@@ -261,7 +271,7 @@ class Person(Agent):
                 self.type = 'I'
                 self.image.fill('blue')
                 self.current_state = 'infected'
-        elif self.environment == "hub": 
+        elif self.environment == "hub":
             if not self.wears_mask and self.n_neighbours_in and 0.2 > np.random.random():
                 self.type = 'I'
                 self.image.fill('blue')
@@ -282,25 +292,42 @@ class Person(Agent):
             if config["person"]["p_recovery"] > np.random.random():
                 self.current_state = 'recovered'
                 if self.type == 'Q':
-                    self.pos = np.array([500.0, 500.0])
+                    self.pos = np.array([500.0, 275.0])
                     self.v = self.set_velocity()
                 self.type = 'R'
                 self.image.fill('green')
 
-        if self.infection_timer > config["person"]["incubation_period"]:
-            if config["person"]["p_onset"] > np.random.random():
-                self.image.fill('red')
-                if self.p_dead > np.random.random():
-                    self.type = 'D'
-                    self.image.fill('pink')
-                    self.image.set_alpha(0)
-                    self.current_state = 'dead'
-                elif self.p_quarantine > np.random.random():
-                    # Quarantine
-                    self.pos = np.array([500.0, 150.0])
-                    self.type = 'Q'
-                self.p_dead = 0
-                self.p_quarantine = 0
+        elif self.infection_timer > config["person"]["incubation_period"]:
+            self.image.fill('red')
+            quarantine_period = config["person"]["incubation_period"] + abs(
+                int(np.random.normal(0, config["person"]["incubation_var"])))
+            if self.infection_timer < quarantine_period:
+                if self.dT != 0:
+                    self.dT = 0
+                    self.pause = True
+            else:
+                if self.dT == 0:
+                    self.dT = config["agent"]["dt"]
+                    self.pause = False
+
+                if config["person"]["p_onset"] > np.random.random():
+                    if self.p_dead > np.random.random():
+                        self.type = 'D'
+                        self.image.fill('pink')
+                        self.image.set_alpha(0)
+                        self.current_state = 'dead'
+                    elif self.p_quarantine > np.random.random():
+                        # Quarantine
+                        min_x, max_x = area(
+                            500, self.population.campus_scale[0])
+                        min_y, max_y = area(
+                            150, self.population.campus_scale[1])
+                        self.pos = np.array(
+                            [randrange(min_x, max_x), randrange(min_y, max_y)])
+                        self.v = self.set_velocity()
+                        self.type = 'Q'
+                    self.p_dead = 0
+                    self.p_quarantine = 0
 
         # # check whether person knows he/she is infected
         # else:
