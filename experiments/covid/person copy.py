@@ -33,13 +33,7 @@ class Person(Agent):
         self.p_quarantine = config["person"]["p_quarantine"]
         self.p_dead = config["person"]["p_dead"]
 
-        self.p_masks = {"N95": config["environment"]["p_mask_n95"],
-                        "surgical": config["environment"]["p_mask_surgical"],
-                        "cotton": config["environment"]["p_mask_cotton"]}
-
         self.wears_mask = False
-        self.mask_type = np.random.choice(
-            ["N95", "surgical", "cotton"], p=[0.1, 0.4, 0.5])
         # policy measures in effect
         # 'none, 'inside_only', or 'always'
         self.mask_worn = config["person"]["mask"]
@@ -49,7 +43,7 @@ class Person(Agent):
         self.social_distancing = config["person"]["social_distancing"]
         # (boolean, start_time, end_time)
         self.curfew = config["person"]["curfew"]
-        # self.corona_app = config["person"]["corona_app"]  # 'True' or 'False'
+        self.corona_app = config["person"]["corona_app"]  # 'True' or 'False'
         if 0.05 > np.random.random():
             self.current_state = 'infected'
             self.type = "I"
@@ -71,10 +65,22 @@ class Person(Agent):
             self.current_state = "vaccinated"
 
         # determine p_mask
-        if self.mask_worn in ['none', 'inside_only']:
-            self.wears_mask = False
+        if self.mask_worn == 'none':
+            self.p_mask = config["person"]["p_mask_none"]
+        elif self.mask_worn == 'inside_only':
+            self.p_mask = config["person"]["p_mask_inside_only"]
+            # for obstacle in self.population.objects.sites:
+            #     collide = pygame.sprite.collide_mask(self, obstacle)
+            #     if bool(collide):
+            #         self.p_mask = 0.95
         else:  # if 'always'
-            self.wears_mask = True
+            self.p_mask = config["person"]["p_mask_always"]
+
+        if not self.wears_mask:
+            if self.p_mask > np.random.random():
+                self.wears_mask = True
+            else:
+                self.wears_mask = False
 
     def update_actions(self) -> None:
         # self.population.datapoints.append(self.type)
@@ -103,19 +109,13 @@ class Person(Agent):
                 collide = pygame.sprite.collide_mask(self, obstacle)
                 if bool(collide):
                     self.environment = "hub"
-                    if self.mask_worn != "none":
-                        self.wears_mask = True
                 else:
                     self.environment = "outside"
-                    if self.mask_worn != "always":
-                        self.wears_mask = False
 
             for obstacle in self.population.objects.sites:
                 collide = pygame.sprite.collide_mask(self, obstacle)
                 if bool(collide):
                     self.environment = "site"
-                    if self.mask_worn != "none":
-                        self.wears_mask = True
                     break
 
             if self.environment == 'hub':
@@ -150,6 +150,15 @@ class Person(Agent):
         """
         Function to decide if agent joins an aggregation
         """
+
+        # for obstacle in self.population.objects.hubs:
+        #     collide = pygame.sprite.collide_mask(self, obstacle)
+        #     if bool(collide):
+        #         self.environment = "hub"
+        #     else:
+        #         self.environment = "outside"
+
+        # determine p_join if entering a site
         if self.environment == 'hub':
 
             p_join = (
@@ -234,15 +243,36 @@ class Person(Agent):
 
     def infection(self):
 
-        if self.environment in ["site", "hub"]:
-            if (not self.wears_mask and self.n_neighbours_in and 0.2 > np.random.random()) or \
-                    self.wears_mask and self.n_neighbours_in and self.p_masks[self.mask_type] > np.random.random():
+        # sites = []
+        # if self.type != "D":
+        #     for obstacle in self.population.objects.sites:
+        #         collide = pygame.sprite.collide_mask(self, obstacle)
+        #         if bool(collide):
+        #             sites.append(True)
+
+        # # determine mobility
+        # if self.curfew[0] == True:
+        #     # check if curfew-time is in effect
+        #     if self.curfew[1] < time_of_day < self.curfew[2]:
+        #         self.v = np.array([0, 0])
+        #     else:
+        #         pass
+        #         # actions that person takes if he/she is out and about
+
+        #         # if person gets infected
+
+        if self.environment == "site":
+            if not self.wears_mask and self.n_neighbours_in and 0.2 > np.random.random():
+                self.type = 'I'
+                self.image.fill('blue')
+                self.current_state = 'infected'
+        elif self.environment == "hub":
+            if not self.wears_mask and self.n_neighbours_in and 0.2 > np.random.random():
                 self.type = 'I'
                 self.image.fill('blue')
                 self.current_state = 'infected'
         else:
-            if (not self.wears_mask and self.n_neighbours_out and 0.4 > np.random.random()) or \
-                    self.wears_mask and self.n_neighbours_out and self.p_masks[self.mask_type] > np.random.random():
+            if not self.wears_mask and self.n_neighbours_out and 0.4 > np.random.random():
                 self.type = 'I'
                 self.image.fill('blue')
                 self.current_state = 'infected'

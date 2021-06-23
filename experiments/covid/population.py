@@ -7,7 +7,7 @@ from simulation.utils import *
 class Population(Swarm):
     """Class that represents the Population for the Covid experiment. TODO"""
 
-    def __init__(self, screen_size, plot={"S": [], "I": [], "R": [], "Q": [], "D": []}) -> None:
+    def __init__(self, screen_size, plot={"S": [], "I": [], "R": [], "Q": [], "D": [], "V": []}) -> None:
         super(Population, self).__init__(
             screen_size, plot)
         self.object_loc = config["base"]["object_location"]
@@ -25,6 +25,7 @@ class Population(Swarm):
         self.campus_loc = config["environment"]["campus"][2]
 
         self.lockdown = config["environment"]["lockdown"]
+
     def initialize(self, num_agents: int) -> None:
         """
         Args:
@@ -150,76 +151,92 @@ class Population(Swarm):
         # code snipet (not complete) to avoid initializing agents on obstacles
         # given some coordinates and obstacles in the environment, this repositions the agent
 
+        to_avoid = [[50, 250], [400, 600], [750, 950]]
+
         if self.campus:
-            # add agents to the environment
             if self.lockdown:
                 for index, agent in enumerate(range(num_agents)):
                     coordinates = generate_coordinates(self.screen)
+                    while(
+                            to_avoid[0][0] <= coordinates[0] <= to_avoid[0][1] or
+                            to_avoid[1][0] <= coordinates[0] <= to_avoid[1][1] or
+                            to_avoid[2][0] <= coordinates[0] <= to_avoid[2][1]):
+                        coordinates = generate_coordinates(
+                            self.screen)
 
-                    for id_obs, obstacle in enumerate(self.objects.obstacles):
-                        if id_obs + 1 != len(self.objects.obstacles):
-                            if index % len(self.objects.obstacles) == id_obs % len(self.objects.obstacles):
-                                min_x, max_x = area(
-                                    obstacle.pos[0], obstacle.scale[0])
-                                min_y, max_y = area(
-                                    obstacle.pos[1], obstacle.scale[1])
-                                while (coordinates[0] >= max_x - 10
-                                    or coordinates[0] <= min_x + 10
-                                    or coordinates[1] >= max_y - 10
-                                    or coordinates[1] <= min_y + 10):
-                                    coordinates = generate_coordinates(self.screen)
-
-                                self.add_agent(Person(pos=np.array(coordinates),
-                                                  v=None, population=self, index=index))
-                                break
-                        else:
-                            while (min_x < coordinates[0] < max_x
-                                   or min_y < coordinates[1] < max_y
-                                   ):
-                                coordinates = generate_coordinates(self.screen)
-                    # else:
-                    #     self.add_agent(Person(pos=np.array(coordinates),
-                    #                           v=None, population=self, index=index))
-
-                        
+                    self.add_agent(Person(pos=np.array(coordinates),
+                                          v=None, population=self, index=index))
             else:
                 for index, agent in enumerate(range(num_agents)):
                     coordinates = generate_coordinates(self.screen)
+                    while (min_x < coordinates[0] < max_x
+                            or min_y < coordinates[1] < max_y
+                           ):
+                        coordinates = generate_coordinates(self.screen)
 
-                    # if sites present re-estimate the corrdinates
-                    if config["population"]["obstacles"]:
-                        while (min_x < coordinates[0] < max_x
-                                or min_y < coordinates[1] < max_y
-                            ):
-                            coordinates = generate_coordinates(self.screen)
-
-                    self.add_agent(Person(pos=np.array(coordinates),
-                                        v=None, population=self, index=index))
-
-        else:
-            if config["population"]["obstacles"]:  # you need to define this variable
-                for index, agent in enumerate(range(num_agents)):
-                    coordinates = generate_coordinates(self.screen)
-                    for obj in self.objects.obstacles:
-                        rel_coordinate = relative(
-                            coordinates, (obj.rect[0], obj.rect[1])
-                        )
-                        # and \
-                        #     (coordinates[0] < max_x
-                        #      or coordinates[0] > min_x
-                        #      or coordinates[1] < max_y
-                        #      or coordinates[1] > min_y)
-                        try:
-                            while obj.mask.get_at(rel_coordinate):
-                                coordinates = generate_coordinates(self.screen)
-                                rel_coordinate = relative(
-                                    coordinates, (obj.rect[0], obj.rect[1])
-                                )
-                        except IndexError:
-                            pass
-                            #print('-' * 50)
-                            #print("ERR", IndexError)
-                            #print('-' * 50)
-                    # print(coordinates, index)
                     self.add_agent(Person(pos=np.array(coordinates),
                                           v=None, population=self, index=index))
+
+        # if self.campus:
+        #     # add agents to the environment
+        #     if self.lockdown:
+        #         for index, agent in enumerate(range(num_agents)):
+        #             coordinates = generate_coordinates(self.screen)
+
+        #             for id_obs, obstacle in enumerate(self.objects.obstacles):
+        #                 if id_obs + 1 != len(self.objects.obstacles):
+        #                     if index % len(self.objects.obstacles) == id_obs % len(self.objects.obstacles):
+        #                         min_x, max_x = area(
+        #                             obstacle.pos[0], obstacle.scale[0])
+        #                         min_y, max_y = area(
+        #                             obstacle.pos[1], obstacle.scale[1])
+        #                         while (coordinates[0] >= max_x - 10
+        #                                or coordinates[0] <= min_x + 10
+        #                                or coordinates[1] >= max_y - 10
+        #                                or coordinates[1] <= min_y + 10):
+        #                             coordinates = generate_coordinates(
+        #                                 self.screen)
+
+        #                         self.add_agent(Person(pos=np.array(coordinates),
+        #                                               v=None, population=self, index=index))
+        #                         break
+        #                 else:
+        #                     while (min_x < coordinates[0] < max_x
+        #                            or min_y < coordinates[1] < max_y
+        #                            ):
+        #                         coordinates = generate_coordinates(self.screen)
+        #             # else:
+        #             #     self.add_agent(Person(pos=np.array(coordinates),
+        #             #                           v=None, population=self, index=index))
+
+        #     else:
+        #         for index, agent in enumerate(range(num_agents)):
+        #             coordinates = generate_coordinates(self.screen)
+
+        #             # if sites present re-estimate the corrdinates
+        #             if config["population"]["obstacles"]:
+        #                 while (min_x < coordinates[0] < max_x
+        #                         or min_y < coordinates[1] < max_y
+        #                        ):
+        #                     coordinates = generate_coordinates(self.screen)
+
+        #             self.add_agent(Person(pos=np.array(coordinates),
+        #                                   v=None, population=self, index=index))
+
+        else:
+            for index, agent in enumerate(range(num_agents)):
+                coordinates = generate_coordinates(self.screen)
+                for obj in self.objects.obstacles:
+                    rel_coordinate = relative(
+                        coordinates, (obj.rect[0], obj.rect[1])
+                    )
+                    try:
+                        while obj.mask.get_at(rel_coordinate):
+                            coordinates = generate_coordinates(self.screen)
+                            rel_coordinate = relative(
+                                coordinates, (obj.rect[0], obj.rect[1])
+                            )
+                    except IndexError:
+                        pass
+                self.add_agent(Person(pos=np.array(coordinates),
+                                      v=None, population=self, index=index))

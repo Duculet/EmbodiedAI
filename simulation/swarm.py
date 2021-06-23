@@ -113,7 +113,7 @@ class Swarm(pygame.sprite.Sprite):
 
         """
         # Count current numbers
-        values = {"S": 0, "I": 0, "R": 0, "Q": 0, "D": 0}
+        values = {"S": 0, "I": 0, "R": 0, "Q": 0, "D": 0, "V": 0}
         for state in lst:
             values[state] += 1
 
