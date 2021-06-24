@@ -42,9 +42,7 @@ class Person(Agent):
             ["N95", "surgical", "cotton"], p=[0.1, 0.4, 0.5])
         # policy measures in effect
         # 'none, 'inside_only', or 'always'
-        self.mask_worn = config["person"]["mask"]
-        # number of time_steps (0 is no quarantine)
-        self.quarantine = config["person"]["quarantine"]
+        self.mask_worn = config["environment"]["mask"]
         # recommended distance (0 is no distancing)
         self.social_distancing = config["person"]["social_distancing"]
         # (boolean, start_time, end_time)
@@ -64,7 +62,7 @@ class Person(Agent):
         self.t_leave = 0
         self.n_neighbours = 0
         self.pause = False
-        if config["person"]["p_vaccination"] > np.random.random():
+        if config["environment"]["p_vaccination"] > np.random.random():
             self.color = "white"
             self.type = "V"
             self.image.fill(self.color)
@@ -240,12 +238,14 @@ class Person(Agent):
                 self.type = 'I'
                 self.image.fill('blue')
                 self.current_state = 'infected'
+                self.population.infected += 1
         else:
             if (not self.wears_mask and self.n_neighbours_out and 0.4 > np.random.random()) or \
                     self.wears_mask and self.n_neighbours_out and self.p_masks[self.mask_type] > np.random.random():
                 self.type = 'I'
                 self.image.fill('blue')
                 self.current_state = 'infected'
+                self.population.infected += 1
 
         self.infection_timer = 0
 
@@ -259,6 +259,7 @@ class Person(Agent):
                 if self.type == 'Q':
                     self.pos = np.array([500.0, 275.0])
                     self.v = self.set_velocity()
+                    self.population.hospitalised += 1
                 self.type = 'R'
                 self.image.fill('green')
 

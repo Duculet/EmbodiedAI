@@ -1,0 +1,14 @@
+Mask,Lockdown,P_Vax
+none,True,0.0
+Infection rate:,14.000000000000002,%
+Hospitalization rate:,0.0,%
+Death rate:,0.0,%
+Vaccinated ratio:,0.0,%
+-,-,-
+Mask,Lockdown,P_Vax
+none,True,0.6
+Infection rate:,3.0,%
+Hospitalization rate:,0.0,%
+Death rate:,0.0,%
+Vaccinated ratio:,66.0,%
+-,-,-

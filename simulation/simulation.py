@@ -1,5 +1,6 @@
 import sys
 import time
+import csv
 
 import matplotlib.pyplot as plt
 import pygame
@@ -12,7 +13,7 @@ from experiments.flocking.flock import Flock
 from experiments.covid.config import config
 
 
-def _plot_covid(data) -> None:
+def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
     # print("DATA", data)
     """
     Plot the data related to the covid experiment. The plot is based on the number of Susceptible,
@@ -23,9 +24,17 @@ def _plot_covid(data) -> None:
         data:
 
     """
-    output_name = "experiments/covid/plots/Covid-19-SIR%s.png" % time.strftime(
-        "-%m.%d.%y-%H:%M", time.localtime()
-    )
+    # output_name = "experiments/covid/plots/Covid-19-SIR%s.png" % time.strftime(
+    #     "-%m.%d.%y-%H:%M", time.localtime()
+    # )
+    # output_name = "experiments/covid/plots/Covid-19-SIR-%s%s.png" % ("&".join(configuration), time.strftime(
+    #     "-%m.%d.%y-%H:%M", time.localtime()))
+
+    configuration = [config["environment"]["mask"],
+                     str(config["environment"]["lockdown"]),
+                     str(config["environment"]["p_vaccination"])]
+    output_name = "experiments/covid/plots/Covid-19-SIR-%s.png" % "&".join(
+        configuration)
     fig = plt.figure()
     plt.plot(data["S"], label="Susceptible", color=(1, 0.5, 0))  # Orange
     plt.plot([i + q for i, q in zip(data["I"], data["Q"])],
@@ -39,7 +48,35 @@ def _plot_covid(data) -> None:
     plt.ylabel("Population")
     plt.legend()
     fig.savefig(output_name)
-    plt.show()
+    plt.cla()
+    plt.clf()
+    plt.close()
+    # plt.show()
+
+    infection_rate = round(infected / (num_agents - data["V"][-1]), 2) * 100
+    hospitalization_rate = round(hospitalised / num_agents, 2) * 100
+    death_rate = round(data["D"][-1] / num_agents, 2) * 100
+    vaxxed_ratio = round(data["V"][-1] / num_agents, 2) * 100
+
+    # open the file in the write mode
+    with open('experiments/covid/data/results.csv', 'a', encoding='utf-8', newline='') as f:
+        # create the csv writer
+        writer = csv.writer(f)
+        # write a row to the csv file
+        writer.writerow(["Mask", "Lockdown", "P_Vax"])
+        writer.writerow(configuration)
+        writer.writerow(["Infection rate:", infection_rate, "%"])
+        writer.writerow(["Hospitalization rate:", hospitalization_rate, "%"])
+        writer.writerow(["Death rate:", death_rate, "%"])
+        writer.writerow(["Vaccinated ratio:", vaxxed_ratio, "%"])
+        writer.writerow(["-", "-", "-"])
+
+    print("-" * 50)
+    print("Results:")
+    print("Infection rate:", infection_rate)
+    print("Hospitalization rate:", hospitalization_rate)
+    print("Death rate:", death_rate)
+    print("Vaccinated ratio:", vaxxed_ratio)
 
 
 def _plot_flock() -> None:
@@ -108,7 +145,8 @@ class Simulation:
     def plot_simulation(self) -> None:
         """Depending on the type of experiment, plots the final data accordingly"""
         if self.swarm_type == "covid":
-            _plot_covid(self.swarm.points_to_plot)
+            _plot_covid(self.swarm.points_to_plot,
+                        self.swarm.hospitalised, self.swarm.infected, self.num_agents)
 
         elif self.swarm_type == "flock":
             _plot_flock()
@@ -157,6 +195,10 @@ class Simulation:
 
             self.plot_simulation()
         else:
+            start = time.time()
             for i in range(self.iter):
                 self.simulate()
+            end = time.time()
             self.plot_simulation()
+            print("Time elapsed:", end - start)
+            print("-" * 50)

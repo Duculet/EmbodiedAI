@@ -1,12 +1,17 @@
 [base]
 swarm_type = 'covid'
-n_agents = 250
+n_agents = 100
 object_location = [500, 500]
 
 [environment]
 split = [[0, 0], [5, 480], [500, 240]]
-lockdown = false
-curfew = false
+lockdown = true
+mask = 'none'
+p_vaccination = 0.6
+
+masks = ['none', 'inside_only', 'always']
+lockdowns = [true, false]
+p_vaccinations = [0.0, 0.6]
 
 campus = [
     [1, 1],
@@ -28,7 +33,7 @@ p_mask_surgical = 0.0011
 p_mask_cotton = 0.005
 
 [screen]
-frames = inf
+frames = 500
 height = 1000
 width = 1000
 fps = 42069
@@ -36,13 +41,10 @@ fps = 42069
 [person]
 #velocity force
 max_force = 8.0
-mask = 'none'
-quarantine = 0
 social_distancing = 50
 distance_var = 10
 curfew = [false, true, true]
 corona_app = true
-p_vaccination = 0.25
 
 min_recovery_period = 1200
 p_recovery = 0.001

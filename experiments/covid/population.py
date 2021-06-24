@@ -26,6 +26,9 @@ class Population(Swarm):
 
         self.lockdown = config["environment"]["lockdown"]
 
+        self.hospitalised = 0
+        self.infected = 0
+
     def initialize(self, num_agents: int) -> None:
         """
         Args:
