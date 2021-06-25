@@ -5,7 +5,7 @@ object_location = [500, 500]
 
 [environment]
 split = [[0, 0], [5, 480], [500, 240]]
-lockdown = true
+lockdown = false
 mask = 'none'
 p_vaccination = 0.6
 

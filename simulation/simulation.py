@@ -42,7 +42,9 @@ def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
     if not os.path.exists(path):
         os.mkdir(path)
 
-    output_name = current_path
+    output_name = current_path + \
+        "Covid-19-SIR-%s.png" % time.strftime(
+            "-%m.%d.%y-%H:%M", time.localtime())
 
     if current_run:
         output_name += "plots/%d.png" % current_run
