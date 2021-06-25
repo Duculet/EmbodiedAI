@@ -1,6 +1,7 @@
 import sys
 import time
 import csv
+import os
 
 import matplotlib.pyplot as plt
 import pygame
@@ -14,7 +15,6 @@ from experiments.covid.config import config
 
 
 def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
-    # print("DATA", data)
     """
     Plot the data related to the covid experiment. The plot is based on the number of Susceptible,
     Infected and Recovered agents
@@ -30,11 +30,21 @@ def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
     # output_name = "experiments/covid/plots/Covid-19-SIR-%s%s.png" % ("&".join(configuration), time.strftime(
     #     "-%m.%d.%y-%H:%M", time.localtime()))
 
-    configuration = [config["environment"]["mask"],
-                     str(config["environment"]["lockdown"]),
-                     str(config["environment"]["p_vaccination"])]
-    output_name = "experiments/covid/plots/Covid-19-SIR-%s.png" % "&".join(
-        configuration)
+    # max_frames = config["screen"]["frames"]
+    # if len(data["S"]) != max_frames:
+    #     for key in data.keys():
+    #         data[key] = data[key][-max_frames:]
+    #         print(len(data[key]))
+    current_path = config["screen"]["current_path"]
+    current_run = config["screen"]["current_run"]
+
+    path = current_path + "plots/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    output_name = current_path + \
+        "plots/%d.png" % current_run
+
     fig = plt.figure()
     plt.plot(data["S"], label="Susceptible", color=(1, 0.5, 0))  # Orange
     plt.plot([i + q for i, q in zip(data["I"], data["Q"])],
@@ -48,10 +58,6 @@ def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
     plt.ylabel("Population")
     plt.legend()
     fig.savefig(output_name)
-    plt.cla()
-    plt.clf()
-    plt.close()
-    # plt.show()
 
     infection_rate = round(infected / (num_agents - data["V"][-1]), 2) * 100
     hospitalization_rate = round(hospitalised / num_agents, 2) * 100
@@ -59,24 +65,22 @@ def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
     vaxxed_ratio = round(data["V"][-1] / num_agents, 2) * 100
 
     # open the file in the write mode
-    with open('experiments/covid/data/results.csv', 'a', encoding='utf-8', newline='') as f:
+    with open(current_path + 'results.csv', 'a', encoding='utf-8', newline='') as f:
         # create the csv writer
         writer = csv.writer(f)
         # write a row to the csv file
-        writer.writerow(["Mask", "Lockdown", "P_Vax"])
-        writer.writerow(configuration)
         writer.writerow(["Infection rate:", infection_rate, "%"])
         writer.writerow(["Hospitalization rate:", hospitalization_rate, "%"])
         writer.writerow(["Death rate:", death_rate, "%"])
         writer.writerow(["Vaccinated ratio:", vaxxed_ratio, "%"])
-        writer.writerow(["-", "-", "-"])
+        writer.writerow(["-", "Done", current_run])
 
-    print("-" * 50)
-    print("Results:")
-    print("Infection rate:", infection_rate)
-    print("Hospitalization rate:", hospitalization_rate)
-    print("Death rate:", death_rate)
-    print("Vaccinated ratio:", vaxxed_ratio)
+    # print("-" * 50)
+    # print("Results:")
+    # print("Infection rate:", infection_rate)
+    # print("Hospitalization rate:", hospitalization_rate)
+    # print("Death rate:", death_rate)
+    # print("Vaccinated ratio:", vaxxed_ratio)
 
 
 def _plot_flock() -> None:
@@ -131,7 +135,8 @@ class Simulation:
             self.swarm = Aggregations(screen_size)
 
         elif self.swarm_type == "covid":
-            self.swarm = Population(screen_size)
+            plot = {"S": [], "I": [], "R": [], "Q": [], "D": [], "V": []}
+            self.swarm = Population(screen_size, plot)
 
         else:
             print("None of the possible swarms selected")

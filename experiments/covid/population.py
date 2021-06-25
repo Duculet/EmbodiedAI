@@ -10,6 +10,7 @@ class Population(Swarm):
     def __init__(self, screen_size, plot={"S": [], "I": [], "R": [], "Q": [], "D": [], "V": []}) -> None:
         super(Population, self).__init__(
             screen_size, plot)
+
         self.object_loc = config["base"]["object_location"]
         self.scale = [250, 250]
         self.quarantine_loc = [75, 75]

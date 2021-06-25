@@ -9,9 +9,12 @@ lockdown = true
 mask = 'none'
 p_vaccination = 0.6
 
-masks = ['none', 'inside_only', 'always']
-lockdowns = [true, false]
-p_vaccinations = [0.0, 0.6]
+# masks = ['none', 'inside_only', 'always']
+# lockdowns = [true, false]
+# p_vaccinations = [0.0, 0.6]
+masks = ['none']
+lockdowns = [true]
+p_vaccinations = [0.0]
 
 campus = [
     [1, 1],
@@ -33,10 +36,13 @@ p_mask_surgical = 0.0011
 p_mask_cotton = 0.005
 
 [screen]
-frames = 500
+frames = 4500
 height = 1000
 width = 1000
 fps = 42069
+runs = 10
+current_run = 0
+current_path = "experiments/covid/tests/"
 
 [person]
 #velocity force

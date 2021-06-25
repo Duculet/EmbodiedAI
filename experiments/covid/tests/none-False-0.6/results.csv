@@ -1,0 +1,52 @@
+Mask,Lockdown,P_Vax
+none,False,0.6
+Infection rate:,0.0,%
+Hospitalization rate:,1.0,%
+Death rate:,0.0,%
+Vaccinated ratio:,63.0,%
+-,Done,1
+Infection rate:,28.000000000000004,%
+Hospitalization rate:,1.0,%
+Death rate:,0.0,%
+Vaccinated ratio:,64.0,%
+-,Done,2
+Infection rate:,0.0,%
+Hospitalization rate:,0.0,%
+Death rate:,0.0,%
+Vaccinated ratio:,55.00000000000001,%
+-,Done,3
+Infection rate:,69.0,%
+Hospitalization rate:,9.0,%
+Death rate:,2.0,%
+Vaccinated ratio:,61.0,%
+-,Done,4
+Infection rate:,78.0,%
+Hospitalization rate:,4.0,%
+Death rate:,2.0,%
+Vaccinated ratio:,59.0,%
+-,Done,5
+Infection rate:,0.0,%
+Hospitalization rate:,1.0,%
+Death rate:,0.0,%
+Vaccinated ratio:,64.0,%
+-,Done,6
+Infection rate:,25.0,%
+Hospitalization rate:,6.0,%
+Death rate:,0.0,%
+Vaccinated ratio:,64.0,%
+-,Done,7
+Infection rate:,56.00000000000001,%
+Hospitalization rate:,6.0,%
+Death rate:,2.0,%
+Vaccinated ratio:,64.0,%
+-,Done,8
+Infection rate:,28.000000000000004,%
+Hospitalization rate:,2.0,%
+Death rate:,0.0,%
+Vaccinated ratio:,56.99999999999999,%
+-,Done,9
+Infection rate:,71.0,%
+Hospitalization rate:,10.0,%
+Death rate:,1.0,%
+Vaccinated ratio:,51.0,%
+-,Done,10
