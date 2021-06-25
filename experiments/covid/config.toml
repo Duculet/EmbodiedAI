@@ -43,6 +43,7 @@ fps = 42069
 runs = 10
 current_run = 0
 current_path = "experiments/covid/tests/"
+testing = false
 
 [person]
 #velocity force
