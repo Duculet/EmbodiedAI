@@ -48,6 +48,19 @@ if __name__ == "__main__":
                     iterations=config["screen"]["frames"])
                 sim.run()
     else:
+        path = "experiments/covid/tests/others/"
+        config["screen"]["current_path"] = path
+        if not os.path.exists(path):
+            os.mkdir(path)
+        with open(path + "results.csv", 'w', encoding="utf-8", newline='') as f:
+            # create the csv writer
+            writer = csv.writer(f)
+            # write a row to the csv file
+            writer.writerow(["Mask", "Lockdown", "P_Vax"])
+            mask, lockdown, p_vax = config["environment"]["mask"], \
+                config["environment"]["lockdown"], \
+                config["environment"]["p_vaccination"]
+            writer.writerow([mask, lockdown, p_vax])
         pygame.init()
         sim = Simulation(
             num_agents=config["base"]["n_agents"],

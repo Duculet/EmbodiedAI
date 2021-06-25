@@ -42,8 +42,10 @@ def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
     if not os.path.exists(path):
         os.mkdir(path)
 
-    output_name = current_path + \
-        "plots/%d.png" % current_run
+    output_name = current_path
+
+    if current_run:
+        output_name += "plots/%d.png" % current_run
 
     fig = plt.figure()
     plt.plot(data["S"], label="Susceptible", color=(1, 0.5, 0))  # Orange
