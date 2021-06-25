@@ -42,17 +42,19 @@ def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
     if not os.path.exists(path):
         os.mkdir(path)
 
-    output_name = current_path + \
-        "Covid-19-SIR-%s.png" % time.strftime(
-            "-%m.%d.%y-%H:%M", time.localtime())
+    output_name = current_path
 
     if current_run:
         output_name += "plots/%d.png" % current_run
+    else:
+        output_name += "Covid-19-SIR-%s.png" % time.strftime(
+            "-%m.%d.%y-%H:%M", time.localtime())
+
+    infected_data = [i + q for i, q in zip(data["I"], data["Q"])]
 
     fig = plt.figure()
     plt.plot(data["S"], label="Susceptible", color=(1, 0.5, 0))  # Orange
-    plt.plot([i + q for i, q in zip(data["I"], data["Q"])],
-             label="Infected", color=(1, 0, 0))  # Red
+    plt.plot(infected_data, label="Infected", color=(1, 0, 0))  # Red
     plt.plot(data["R"], label="Recovered", color=(0, 1, 0))  # Green
     plt.plot(data["Q"], label="Quarantined", color=(0, 0, 1))  # Blue
     plt.plot(data["D"], label="Dead", color=(1, 0, 1))  # Purple
@@ -74,17 +76,21 @@ def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
         writer = csv.writer(f)
         # write a row to the csv file
         writer.writerow(["Infection rate:", infection_rate, "%"])
+        writer.writerow(["Infection ATH:", max(infected_data), "people"])
         writer.writerow(["Hospitalization rate:", hospitalization_rate, "%"])
+        writer.writerow(["Hospitalization ATH:", max(data["Q"]), "people"])
         writer.writerow(["Death rate:", death_rate, "%"])
         writer.writerow(["Vaccinated ratio:", vaxxed_ratio, "%"])
         writer.writerow(["-", "Done", current_run])
 
-    # print("-" * 50)
-    # print("Results:")
-    # print("Infection rate:", infection_rate)
-    # print("Hospitalization rate:", hospitalization_rate)
-    # print("Death rate:", death_rate)
-    # print("Vaccinated ratio:", vaxxed_ratio)
+    print("-" * 50)
+    print("Results:")
+    print("Infection rate:", infection_rate)
+    print("Infection ATH:", max(infected_data))
+    print("Hospitalization rate:", hospitalization_rate)
+    print("Hospitalization ATH:", max(data["Q"]))
+    print("Death rate:", death_rate)
+    print("Vaccinated ratio:", vaxxed_ratio)
 
 
 def _plot_flock() -> None:
@@ -198,7 +204,7 @@ class Simulation:
         if self.iter == float("inf"):
 
             while self.running:
-                init = time.time()
+                # init = time.time()
                 self.simulate()
                 # print(time.time() - init)
 
