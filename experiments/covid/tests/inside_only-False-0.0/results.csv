@@ -1,52 +1,72 @@
 Mask,Lockdown,P_Vax
 inside_only,False,0.0
-Infection rate:,64.0,%
-Hospitalization rate:,9.0,%
-Death rate:,4.0,%
-Vaccinated ratio:,0.0,%
--,Done,1
-Infection rate:,77.0,%
-Hospitalization rate:,19.0,%
-Death rate:,6.0,%
-Vaccinated ratio:,0.0,%
--,Done,2
-Infection rate:,80.0,%
-Hospitalization rate:,13.0,%
+Infection rate:,78.0,%
+Infection ATH:,55,people
+Hospitalization rate:,16.0,%
+Hospitalization ATH:,14,people
 Death rate:,3.0,%
 Vaccinated ratio:,0.0,%
--,Done,3
-Infection rate:,72.0,%
-Hospitalization rate:,14.000000000000002,%
+-,Done,1
+Infection rate:,55.00000000000001,%
+Infection ATH:,34,people
+Hospitalization rate:,5.0,%
+Hospitalization ATH:,6,people
 Death rate:,2.0,%
 Vaccinated ratio:,0.0,%
+-,Done,2
+Infection rate:,73.0,%
+Infection ATH:,49,people
+Hospitalization rate:,21.0,%
+Hospitalization ATH:,15,people
+Death rate:,2.0,%
+Vaccinated ratio:,0.0,%
+-,Done,3
+Infection rate:,69.0,%
+Infection ATH:,44,people
+Hospitalization rate:,13.0,%
+Hospitalization ATH:,10,people
+Death rate:,7.000000000000001,%
+Vaccinated ratio:,0.0,%
 -,Done,4
-Infection rate:,77.0,%
-Hospitalization rate:,9.0,%
-Death rate:,5.0,%
+Infection rate:,73.0,%
+Infection ATH:,48,people
+Hospitalization rate:,11.0,%
+Hospitalization ATH:,13,people
+Death rate:,1.0,%
 Vaccinated ratio:,0.0,%
 -,Done,5
-Infection rate:,11.0,%
-Hospitalization rate:,2.0,%
+Infection rate:,0.0,%
+Infection ATH:,1,people
+Hospitalization rate:,0.0,%
+Hospitalization ATH:,0,people
 Death rate:,0.0,%
 Vaccinated ratio:,0.0,%
 -,Done,6
-Infection rate:,68.0,%
-Hospitalization rate:,23.0,%
-Death rate:,3.0,%
+Infection rate:,71.0,%
+Infection ATH:,46,people
+Hospitalization rate:,16.0,%
+Hospitalization ATH:,10,people
+Death rate:,7.000000000000001,%
 Vaccinated ratio:,0.0,%
 -,Done,7
-Infection rate:,70.0,%
-Hospitalization rate:,9.0,%
-Death rate:,3.0,%
+Infection rate:,76.0,%
+Infection ATH:,47,people
+Hospitalization rate:,18.0,%
+Hospitalization ATH:,11,people
+Death rate:,0.0,%
 Vaccinated ratio:,0.0,%
 -,Done,8
-Infection rate:,83.0,%
-Hospitalization rate:,20.0,%
-Death rate:,5.0,%
+Infection rate:,73.0,%
+Infection ATH:,53,people
+Hospitalization rate:,15.0,%
+Hospitalization ATH:,13,people
+Death rate:,6.0,%
 Vaccinated ratio:,0.0,%
 -,Done,9
-Infection rate:,66.0,%
-Hospitalization rate:,4.0,%
-Death rate:,1.0,%
+Infection rate:,63.0,%
+Infection ATH:,42,people
+Hospitalization rate:,15.0,%
+Hospitalization ATH:,10,people
+Death rate:,6.0,%
 Vaccinated ratio:,0.0,%
 -,Done,10

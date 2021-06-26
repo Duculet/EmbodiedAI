@@ -9,15 +9,15 @@ lockdown = false
 mask = 'none'
 p_vaccination = 0.6
 
-# masks = ['none', 'inside_only', 'always']
-# lockdowns = [true, false]
-# p_vaccinations = [0.0, 0.6]
+masks = ['none', 'inside_only', 'always']
+lockdowns = [true, false]
+p_vaccinations = [0.0, 0.6]
 # masks = ['none', 'inside_only', 'always']
 # lockdowns = [false, true]
 # p_vaccinations = [0.0, 0.6]
-masks = ['none', 'inside_only', 'always']
-lockdowns = [false, true]
-p_vaccinations = [0.0, 0.6]
+# masks = ['always']
+# lockdowns = [false, true]
+# p_vaccinations = [0.0, 0.6]
 
 campus = [
     [1, 1],
