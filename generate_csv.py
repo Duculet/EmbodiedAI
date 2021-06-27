@@ -1,4 +1,5 @@
-import csv, os
+import csv
+import os
 
 from experiments.covid.config import config
 from itertools import product
@@ -20,14 +21,14 @@ for mask, lockdown, p_vax in parameters:
     scenario_path = output_path + '%s-%s-%s/' % (m, l, v)
     if not os.path.exists(scenario_path):
         os.mkdir(scenario_path)
-    out_dict = {"Infection rate:": [], "Infection ATH:": [], "Hospitalization rate:": [], 
+    out_dict = {"Infection rate:": [], "Infection ATH:": [], "Hospitalization rate:": [],
                 "Hospitalization ATH:": [], "Death rate:": [], "Vaccinated ratio:": []}
     with open(scenario_path + 'results.csv', 'w', encoding="utf-8", newline='') as n:
         # create the csv writer
         writer = csv.writer(n)
         # write a row to the csv file
-        headers = ['Infection rate:', 'Infection ATH:', 'Hospitalization rate:', 
-                    'Hospitalization ATH:', 'Death rate:', 'Vaccinated ratio:']
+        headers = ['Infection rate:', 'Infection ATH:', 'Hospitalization rate:',
+                   'Hospitalization ATH:', 'Death rate:', 'Vaccinated ratio:']
         writer.writerow(headers)
         with open(results_path + 'results.csv', 'r', encoding="utf-8", newline='') as r:
             # create the csv reader
@@ -36,11 +37,7 @@ for mask, lockdown, p_vax in parameters:
                 if m_c in headers:
                     out_dict[m_c].append(l_c)
 
-        values = [comb for comb in zip(out_dict[headers[0]], out_dict[headers[1]], out_dict[headers[2]], out_dict[headers[3]], out_dict[headers[4]])]
+        values = [comb for comb in zip(out_dict[headers[0]], out_dict[headers[1]], out_dict[headers[2]],
+                                       out_dict[headers[3]], out_dict[headers[4]], out_dict[headers[5]])]
         for c in values:
             writer.writerow(c)
-                
-
-            
-            
-    
