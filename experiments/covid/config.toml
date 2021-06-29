@@ -1,6 +1,6 @@
 [base]
 swarm_type = 'covid'
-n_agents = 100
+n_agents = 0
 object_location = [500, 500]
 
 [environment]
@@ -39,14 +39,14 @@ p_mask_surgical = 0.0011
 p_mask_cotton = 0.005
 
 [screen]
-frames = 4500
+frames = inf
 height = 1000
 width = 1000
 fps = 42069
 runs = 10
 current_run = 0
 current_path = "experiments/covid/tests/"
-testing = true
+testing = false
 
 [person]
 #velocity force

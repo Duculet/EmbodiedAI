@@ -24,17 +24,6 @@ def _plot_covid(data, hospitalised=1, infected=1, num_agents=1) -> None:
         data:
 
     """
-    # output_name = "experiments/covid/plots/Covid-19-SIR%s.png" % time.strftime(
-    #     "-%m.%d.%y-%H:%M", time.localtime()
-    # )
-    # output_name = "experiments/covid/plots/Covid-19-SIR-%s%s.png" % ("&".join(configuration), time.strftime(
-    #     "-%m.%d.%y-%H:%M", time.localtime()))
-
-    # max_frames = config["screen"]["frames"]
-    # if len(data["S"]) != max_frames:
-    #     for key in data.keys():
-    #         data[key] = data[key][-max_frames:]
-    #         print(len(data[key]))
     current_path = config["screen"]["current_path"]
     current_run = config["screen"]["current_run"]
 
